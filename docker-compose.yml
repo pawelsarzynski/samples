@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  api:
+    image: chat-me-api
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        port: ${PORT:?Port is not set}
+    ports:
+      - ${PORT}:${PORT}
+      - 80:80
+      - 5555:5555
+    depends_on:
+      - db
+    container_name: chat-me-api
+  db:
+    image: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: secret
+    ports:
+      - 5432:5432
+    container_name: chat-me-db
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./init-sql.sh:/docker-entrypoint-initdb.d/init-sql.sh
+volumes:
+  db-data:
